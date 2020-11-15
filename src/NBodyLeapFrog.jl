@@ -1,5 +1,9 @@
 module NBodyLeapFrog
 
-# Write your package code here.
+using LinearAlgebra
+using Plots
+
+include("starData.jl")
+include("Core.jl")
 
 end
