@@ -1,7 +1,8 @@
 module NBodyLeapFrog
 
 using LinearAlgebra
-using Plots
+
+export nOrbit
 
 include("starData.jl")
 include("Core.jl")
