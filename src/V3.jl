@@ -22,6 +22,11 @@ for OP in [:+, :-]
     @inline @eval function Base.$OP(v::V3, w::V3)
         V3($OP(v.x, w.x), $OP(v.y, w.y), $OP(v.z, w.z))
     end
+    @eval @i @inline @eval function :(+=)($OP)(y!::V3, v::V3, w::V3)
+        y!.x += $OP(v.x, w.x)
+        y!.y += $OP(v.y, w.y)
+        y!.z += $OP(v.z, w.z)
+    end
 end
 
 @i @inline @eval function :(+=)(identity)(y!::V3, w::V3)

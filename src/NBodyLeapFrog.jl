@@ -2,7 +2,7 @@ module NBodyLeapFrog
 
 using LinearAlgebra, NiLang
 
-export Bodies, nOrbit, fast_nOrbit
+export Bodies, leapfrog, fast_leapfrog
 export Body, V3
 
 include("V3.jl")

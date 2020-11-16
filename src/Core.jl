@@ -5,11 +5,11 @@ using .Bodies: G_year_AU, Body
     (G*mb/d^3) * (rb - ra)
 end
 
-function nOrbit(planets; G=G_year_AU, n, dt) # this is the bulk of the code
+function leapfrog(planets::AbstractVector{Body{T}}; G=G_year_AU, n, dt) where T
     nplanets = length(planets)
-    a = zeros(V3{Float64}, (nplanets,n))
-    v = zeros(V3{Float64}, (nplanets,n+1))
-    r = zeros(V3{Float64}, (nplanets,n+1))
+    a = zeros(V3{T}, (nplanets,n))
+    v = zeros(V3{T}, (nplanets,n+1))
+    r = zeros(V3{T}, (nplanets,n+1))
     v[:,1] .= getfield.(planets, :v)
     r[:,1] .= getfield.(planets, :r)
     @inbounds for i=1:n
@@ -22,7 +22,7 @@ function nOrbit(planets; G=G_year_AU, n, dt) # this is the bulk of the code
             end
         end
 
-        # update velocity  
+        # update velocity
         if i==1
             for j=1:nplanets
                 v[j,i+1] = dt*a[j,i] + v[j,i]
@@ -32,10 +32,10 @@ function nOrbit(planets; G=G_year_AU, n, dt) # this is the bulk of the code
                 v[j,i+1] = 2dt*a[j,i] + v[j,i-1]
             end
         end
-                 
+
         # update position
         if i ==1
-            # Get position with Euler method for i==0      
+            # Get position with Euler method for i==0
             for j=1:nplanets
                 r[j,i+1] = dt*v[j,i] + r[j,i]
             end
@@ -49,17 +49,17 @@ function nOrbit(planets; G=G_year_AU, n, dt) # this is the bulk of the code
     return r, v, a
 end
 
-function fast_nOrbit(planets; G=G_year_AU, n, dt) # this is the bulk of the code
+function fast_leapfrog(planets::AbstractVector{Body{T}}; G=G_year_AU, n, dt) where T
     nplanets = length(planets)
-    a = zeros(V3{Float64}, nplanets)
-    v = zeros(V3{Float64}, nplanets,2)
-    r = zeros(V3{Float64}, nplanets,2)
+    a = zeros(V3{T}, nplanets)
+    v = zeros(V3{T}, nplanets,2)
+    r = zeros(V3{T}, nplanets,2)
     v[:,1] .= getfield.(planets, :v)
     r[:,1] .= getfield.(planets, :r)
     @inbounds for i=1:n
         # compute acceleration
         for j=1:nplanets
-            a[j] = zero(V3{Float64})
+            a[j] = zero(V3{T})
             for k=1:nplanets
                 if j != k
                     a[j] += acceleration(r[j,mod1(i,2)], r[k,mod1(i,2)], planets[k].m, G)
@@ -67,7 +67,7 @@ function fast_nOrbit(planets; G=G_year_AU, n, dt) # this is the bulk of the code
             end
         end
 
-        # update velocity  
+        # update velocity
         if i==1
             for j=1:nplanets
                 v[j,2] = dt*a[j] + v[j,1]
@@ -77,10 +77,10 @@ function fast_nOrbit(planets; G=G_year_AU, n, dt) # this is the bulk of the code
                 v[j,mod1(i+1,2)] += 2dt*a[j]
             end
         end
-                 
+
         # update position
         if i ==1
-            # Get position with Euler method for i==0      
+            # Get position with Euler method for i==0
             for j=1:nplanets
                 r[j,2] += dt*v[j,1] + r[j,1]
             end
