@@ -2,7 +2,7 @@ module NBodyLeapFrog
 
 using LinearAlgebra
 
-export nOrbit
+export Bodies, nOrbit
 
 include("starData.jl")
 include("Core.jl")
