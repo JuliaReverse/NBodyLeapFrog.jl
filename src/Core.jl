@@ -25,25 +25,17 @@ function leapfrog(planets::AbstractVector{Body{T}}; G=G_year_AU, n, dt) where T
         # update velocity
         if i==1
             for j=1:nplanets
-                v[j,i+1] = dt*a[j,i] + v[j,i]
+                v[j,i+1] = dt/2*a[j,i] + v[j,i]
             end
         else # Use leap frog method to update velocity
             for j=1:nplanets
-                v[j,i+1] = 2dt*a[j,i] + v[j,i-1]
+                v[j,i+1] = dt*a[j,i] + v[j,i]
             end
         end
 
         # update position
-        if i ==1
-            # Get position with Euler method for i==0
-            for j=1:nplanets
-                r[j,i+1] = dt*v[j,i] + r[j,i]
-            end
-        else
-            # Update position with leap frog method
-            for j=1:nplanets
-                r[j,i+1] = 2dt*v[j,i] + r[j,i-1]
-            end
+        for j=1:nplanets
+            r[j,i+1] = dt*v[j,i+1] + r[j,i]
         end
     end
     return r, v, a
@@ -52,17 +44,15 @@ end
 function fast_leapfrog(planets::AbstractVector{Body{T}}; G=G_year_AU, n, dt) where T
     nplanets = length(planets)
     a = zeros(V3{T}, nplanets)
-    v = zeros(V3{T}, nplanets,2)
-    r = zeros(V3{T}, nplanets,2)
-    v[:,1] .= getfield.(planets, :v)
-    r[:,1] .= getfield.(planets, :r)
+    v = getfield.(planets, :v)
+    r = getfield.(planets, :r)
     @inbounds for i=1:n
         # compute acceleration
         for j=1:nplanets
             a[j] = zero(V3{T})
             for k=1:nplanets
                 if j != k
-                    a[j] += acceleration(r[j,mod1(i,2)], r[k,mod1(i,2)], planets[k].m, G)
+                    a[j] += acceleration(r[j], r[k], planets[k].m, G)
                 end
             end
         end
@@ -70,25 +60,17 @@ function fast_leapfrog(planets::AbstractVector{Body{T}}; G=G_year_AU, n, dt) whe
         # update velocity
         if i==1
             for j=1:nplanets
-                v[j,2] = dt*a[j] + v[j,1]
+                v[j] += dt/2*a[j]
             end
         else # Use leap frog method to update velocity
             for j=1:nplanets
-                v[j,mod1(i+1,2)] += 2dt*a[j]
+                v[j] += dt*a[j]
             end
         end
 
         # update position
-        if i ==1
-            # Get position with Euler method for i==0
-            for j=1:nplanets
-                r[j,2] += dt*v[j,1] + r[j,1]
-            end
-        else
-            # Update position with leap frog method
-            for j=1:nplanets
-                r[j,mod1(i+1,2)] += 2dt*v[j,mod1(i,2)]
-            end
+        for j=1:nplanets
+            r[j] += dt*v[j]
         end
     end
     return r, v, a

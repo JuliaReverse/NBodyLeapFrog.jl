@@ -37,8 +37,8 @@ end
     nplanets = length(planets)
     r, v, a = leapfrog(planets; n = 55, dt = 0.01)
     r2, v2, a2 = fast_leapfrog(planets; n = 55, dt = 0.01)
-    @test all(a->a[1]≈ a[2], zip(a[:,end], a2))
-    @test all(r->r[1]≈r[2], zip(r[:,end], r2[:,end]))
+    @test all(a->isapprox(a[1], a[2]), zip(a[:,end], a2))
+    @test all(r->isapprox(r[1], r[2]), zip(r[:,end], r2[:,end]))
 end
 
 @testset "NBodyLeapFrog.jl" begin
@@ -47,24 +47,24 @@ end
     n = 55
     r, v = leapfrog(planets; n = n, dt = 0.01)
 
-    v2 = zeros(V3{Float64}, (nplanets,2))
-    r2 = zeros(V3{Float64}, (nplanets,2))
+    v2 = zeros(V3{Float64}, nplanets)
+    r2 = zeros(V3{Float64}, nplanets)
     planets = Bodies.chunit_day2year.(Bodies.set)
     @instr i_leapfrog(r2, v2, planets; n = n, dt = 0.01)
     @test check_inv(i_leapfrog, (r2, v2, planets); n = n, dt = 0.01)
-    @test all(r->r[1]≈r[2], zip(r[:,end], r2[:,end]))
+    @test all(r->r[1]≈r[2], zip(r[:,end], r2))
 
-    v2 = zeros(V3{Float64}, (nplanets,2))
-    r2 = zeros(V3{Float64}, (nplanets,2))
+    v2 = zeros(V3{Float64}, nplanets)
+    r2 = zeros(V3{Float64}, nplanets)
     planets = Bodies.chunit_day2year.(Bodies.set)
-    @instr i_leapfrog_clean(r2, v2, planets; n = n, dt = 0.01)
+    @instr i_leapfrog_reuse(r2, v2, planets; n = n, dt = 0.01)
     @test check_inv(i_leapfrog, (r2, v2, planets); n = n, dt = 0.01)
-    @test all(r->r[1]≈r[2], zip(r[:,end], r2[:,end]))
+    @test all(r->r[1]≈r[2], zip(r[:,end], r2))
 
     planets = Bodies.chunit_day2year.(Bodies.set)
     @i function loss(y!, r2, v2, planets; n, dt)
         i_leapfrog(r2, v2, planets; n = n, dt = dt)
-        y! += sqdistance(r2[2,mod1(n+1,2)], r2[3,mod1(n+1,2)])
+        y! += sqdistance(r2[2], r2[3])
     end
     _, _, _, _, gp = Grad(loss)(Val(1), 0.0, copy(r2), copy(v2), planets; n = n, dt = 0.01)
     for i=1:nplanets
