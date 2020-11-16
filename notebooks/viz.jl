@@ -58,3 +58,20 @@ plt.show();
 
 #savefig('NBodyOrbit100Momentum.png', bbox_inches='tight'); 
 
+
+
+using Plots
+function showres(vs)
+    a = map(x->x.x, vs)
+    b = map(x->x.y, vs)
+    plt = plot([], [])
+    for i in 1:nplanets
+        plot!(plt,a[i,:],b[i,:])
+    end
+    plt
+end
+
+showres(r)
+
+# python 5.6s
+# before opt, 0.34s
