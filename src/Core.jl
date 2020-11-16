@@ -1,12 +1,6 @@
-using .Bodies: V3, distance, mass_solar
-#  unit of time -> year, unit of space -> AU
-const year = 3.154e7 #year in seconds
-const AU = 1.496e11 #in m
+using .Bodies: G_year_AU, Body
 
-const G_standard = 6.67259e-11 # in m^3/(kg-s^2)
-const G_year_AU = G_standard*(1/AU)^3/(1/mass_solar*(1/year)^2)
-
-function acceleration(ra, rb, mb, G) # Get acceleration of celestial body
+@inline function acceleration(ra, rb, mb, G) # Get acceleration of celestial body
     d = distance(ra, rb)
     (G*mb/d^3) * (rb - ra)
 end
@@ -62,7 +56,7 @@ function fast_nOrbit(planets; G=G_year_AU, n, dt) # this is the bulk of the code
     r = zeros(V3{Float64}, nplanets,2)
     v[:,1] .= getfield.(planets, :v)
     r[:,1] .= getfield.(planets, :r)
-    for i=1:n
+    @inbounds for i=1:n
         # compute acceleration
         for j=1:nplanets
             a[j] = zero(V3{Float64})
@@ -88,7 +82,7 @@ function fast_nOrbit(planets; G=G_year_AU, n, dt) # this is the bulk of the code
         if i ==1
             # Get position with Euler method for i==0      
             for j=1:nplanets
-                r[j,2] += dt*v[j,1]
+                r[j,2] += dt*v[j,1] + r[j,1]
             end
         else
             # Update position with leap frog method

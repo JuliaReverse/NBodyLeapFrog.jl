@@ -2,14 +2,14 @@ function energy(planets)
     eng = 0.0
     # kinetic energy
     for p in planets
-        eng += 1/2*p.m*sqdist(p.v)
+        eng += 1/2*p.m*norm2(p.v)
     end
     # potential energy
     for j in 1:nplanets
         pj = planets[j]
         for k in j+1:nplanets
             pk = planets[k]
-            eng -= G*pj.m*pk.m/norm2(pj.r, pk.r)
+            eng -= G*pj.m*pk.m/sqdist(pj.r, pk.r)
         end
     end
     eng

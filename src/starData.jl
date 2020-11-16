@@ -1,5 +1,6 @@
 module Bodies
     import LinearAlgebra
+    using NBodyLeapFrog: V3
 
     const mass_solar = 1.988544e30 # in kg
     const mass_mercury = 3.302e23
@@ -17,32 +18,13 @@ module Bodies
     # maximally packed. There is room to add another planet and preserve the 
     # stable orbit of all planets.)
 
-    struct V3{T}
-        x::T
-        y::T
-        z::T
-    end
-    function Base.:(*)(v::V3, x::Real)
-        V3(v.x*x, v.y*x, v.z*x)
-    end
-    function Base.:(*)(x::Real, v::V3)
-        v*x
-    end
-    for OP in [:+, :-]
-        @eval function Base.$OP(v::V3, w::V3)
-            V3($OP(v.x, w.x), $OP(v.y, w.y), $OP(v.z, w.z))
-        end
-    end
-    function LinearAlgebra.norm2(v::V3)
-        sqrt(v.x^2 + v.y^2 + v.z^2)
-    end
-    function sqnorm2(v::V3)
-        v.x^2 + v.y^2 + v.z^2
-    end
-    function distance(r1::V3, r2::V3)
-        return sqrt((r1.x - r2.x)^2 + (r1.y-r2.y)^2 + (r1.z-r2.z)^2)
-    end
-    Base.zero(::Type{V3{T}}) where T = V3(zero(T), zero(T), zero(T))
+    #  unit of time -> year, unit of space -> AU
+    const year = 3.154e7 #year in seconds
+    const AU = 1.496e11 #in m
+
+    const G_standard = 6.67259e-11 # in m^3/(kg-s^2)
+    const G_year_AU = G_standard*(1/AU)^3/(1/mass_solar*(1/year)^2)
+
     struct Body{T}
         r::V3{T}
         v::V3{T}
