@@ -44,8 +44,10 @@ end
 function fast_leapfrog(planets::AbstractVector{Body{T}}; G=G_year_AU, n, dt) where T
     nplanets = length(planets)
     a = zeros(V3{T}, nplanets)
-    v = getfield.(planets, :v)
-    r = getfield.(planets, :r)
+    v = zeros(V3{T}, nplanets)
+    r = zeros(V3{T}, nplanets)
+    v[:] .= getfield.(planets, :v)
+    r[:] .= getfield.(planets, :r)
     @inbounds for i=1:n
         # compute acceleration
         for j=1:nplanets
