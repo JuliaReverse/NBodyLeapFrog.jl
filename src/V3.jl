@@ -6,6 +6,16 @@ end
 @inline Base.zero(::Type{V3{T}}) where T = V3(zero(T), zero(T), zero(T))
 @inline Base.zero(::V3{T}) where T = zero(V3{T})
 @inline Base.isapprox(a::V3, b::V3; kwargs...) = isapprox(a.x, b.x; kwargs...) && isapprox(a.y, b.y; kwargs...) && isapprox(a.z, b.z; kwargs...)
+function Base.getindex(v::V3, i::Integer)
+    @boundscheck i==1 || i==2 || i==3
+    if i==1
+        v.x
+    elseif i==2
+        v.y
+    else
+        v.z
+    end
+end
 
 # +=*/
 for OP in [:+, :-]

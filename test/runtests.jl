@@ -57,5 +57,41 @@ end
         i_leapfrog(r2, v2, planets; n = n, dt = dt)
         y! += sqdistance(r2[2,mod1(n+1,2)], r2[3,mod1(n+1,2)])
     end
-    Grad(loss)(Val(1), 0.0, copy(r2), copy(v2), planets; n = n, dt = 0.01)
+    _, _, _, _, gp = Grad(loss)(Val(1), 0.0, copy(r2), copy(v2), planets; n = n, dt = 0.01)
+    for i=1:nplanets
+        # gradients on r
+        for j=1:3
+            ps = copy(planets)
+            l0 = loss(0.0, copy(r2), copy(v2), copy(ps); n=n, dt=0.01)[1]
+
+            z = zeros(3)
+            z[j] += 1e-5
+            ps[i] = Body(ps[i].r+V3(z...), ps[i].v, ps[i].m)
+            l1 = loss(0.0, copy(r2), copy(v2), copy(ps); n=n, dt=0.01)[1]
+            ng = (l1-l0)/1e-5
+            @test isapprox(ng, gp[i].r[j].g; atol=1e-5, rtol=1e-2)
+        end
+
+        # gradients on v
+        for j=1:3
+            ps = copy(planets)
+            l0 = loss(0.0, copy(r2), copy(v2), copy(ps); n=n, dt=0.01)[1]
+
+            z = zeros(3)
+            z[j] += 1e-5
+            ps[i] = Body(ps[i].r, ps[i].v+V3(z...), ps[i].m)
+            l1 = loss(0.0, copy(r2), copy(v2), copy(ps); n=n, dt=0.01)[1]
+            ng = (l1-l0)/1e-5
+            @test isapprox(ng, gp[i].v[j].g; atol=1e-5, rtol=1e-2)
+        end
+
+        # gradients on m
+        ps = copy(planets)
+        l0 = loss(0.0, copy(r2), copy(v2), copy(ps); n=n, dt=0.01)[1]
+
+        ps[i] = Body(ps[i].r, ps[i].v, ps[i].m+1e-5)
+        l1 = loss(0.0, copy(r2), copy(v2), copy(ps); n=n, dt=0.01)[1]
+        ng = (l1-l0)/1e-5
+        @test isapprox(ng, gp[i].m.g; atol=1e-5, rtol=1e-2)
+    end
 end
