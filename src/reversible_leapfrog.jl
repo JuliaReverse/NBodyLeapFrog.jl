@@ -1,7 +1,7 @@
 export i_leapfrog, i_leapfrog_reuse
 using .Bodies: G_year_AU, Body
 
-@i @inline function :(+=)(acceleration)(y!::V3{T}, ra::V3{T}, rb::V3{T}, mb::Real, G) where T
+@i @inline function acceleration_reuse(y!::V3{T}, ra::V3{T}, rb::V3{T}, mb::Real, G) where T
     @routine @invcheckoff begin
         @zeros T d anc1 anc2 anc3 anc4
         d += sqdistance(ra, rb)
@@ -15,7 +15,7 @@ using .Bodies: G_year_AU, Body
     ~@routine
 end
 
-@i @inline function acceleration_reuse(y!::V3{T}, ra::V3{T}, rb::V3{T}, mb::Real, G) where T
+@i @inline function :(+=)(acceleration)(y!::V3{T}, ra::V3{T}, rb::V3{T}, mb::Real, G) where T
     @routine @invcheckoff begin
         @zeros T d anc1 anc2 anc3 anc4
         rc ← zero(V3{T})
@@ -50,7 +50,7 @@ end
         @routine for j=1:nplanets
             for k=1:nplanets
                 if j != k
-                    a[j] += acceleration(r[j], r[k], m[k], G)
+                    acceleration_reuse(a[j], r[j], r[k], m[k], G)
                 end
             end
         end
@@ -96,7 +96,7 @@ end
             for j=1:nplanets
                 for k=1:nplanets
                     if j != k
-                        acceleration_reuse(a[j], r[j], r[k], m[k], G)
+                        a[j] += acceleration(r[j], r[k], m[k], G)
                     end
                 end
             end
