@@ -8,6 +8,7 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 NiLang = "ab4ef3a6-0b42-11ea-31f6-e34652774712"
 
 [compat]
+NiLang = "0.7"
 julia = "1"
 
 [extras]
