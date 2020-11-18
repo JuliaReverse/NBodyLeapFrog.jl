@@ -32,13 +32,27 @@ using NiLang, NiLang.AD
     @test y1 ≈ y2
 end
 
-@testset "NBodyLeapFrog.jl" begin
+@testset "leapfrog" begin
     planets = Bodies.chunit_day2year.(Bodies.set)
     nplanets = length(planets)
     r, v = leapfrog(planets; n = 55, dt = 0.01, keep_history=true)
     r2, v2 = leapfrog(planets; n = 55, dt = 0.01)
     @test all(a->isapprox(a[1], a[2]), zip(v[:,end], v2))
     @test all(r->isapprox(r[1], r[2]), zip(r[:,end], r2[:,end]))
+end
+
+@testset "fr" begin
+    n = 100
+    planets = Bodies.chunit_day2year.(Bodies.set)
+    v = getfield.(planets, :v)
+    r = getfield.(planets, :r)
+    m = getfield.(planets, :m)
+    r1, v1 = NBodyLeapFrog.leapfrog!(copy(v), copy(r), m; n = n, dt = 0.01, G=NBodyLeapFrog.G_year_AU)
+    r2, v2 = NBodyLeapFrog.fr!(copy(v), copy(r), m; n = n, dt = 0.01, G=NBodyLeapFrog.G_year_AU)
+    r3, v3 = NBodyLeapFrog.pefrl!(copy(v), copy(r), m; n = n, dt = 0.01, G=NBodyLeapFrog.G_year_AU)
+    @test all(isapprox.(r1, r2; atol=1e-2))
+    @test all(isapprox.(r3, r2; atol=1e-2))
+    @test all(isapprox.(r3, r1; atol=1e-2))
 end
 
 @testset "NBodyLeapFrog.jl" begin
