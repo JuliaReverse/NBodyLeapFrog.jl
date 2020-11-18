@@ -37,19 +37,17 @@ end
 false && let
 	T = Double64
 	nplanets = length(planets)
-	v2 = zeros(V3{T}, (nplanets,2))
-	r2 = zeros(V3{T}, (nplanets,2))
-	@benchmark i_leapfrog($r2, $v2, $(convertelems.(T, planets)); n = 4000, dt = 0.01)
+	ps = convertelems.(T1, planets)
+	f(getfield.(ps, :r), getfield.(ps, :v), getfield.(ps, :m); n = n, dt = 0.01)
 end
 
 # ╔═╡ 3fc1ac08-2830-11eb-3f66-5bc4491ae8fe
 function simulate(::Type{T1}, f, planets, k::Int) where T1
 	nplanets = length(planets)
 	n = 1<<k
-	v1 = zeros(V3{T1}, (nplanets,2))
-	r1 = zeros(V3{T1}, (nplanets,2))
-	f(r1, v1, convertelems.(T1, planets); n = n, dt = 0.01)
-	r1[:,mod1(n+1,2)]
+	ps = convertelems.(T1, planets)
+	r, v = f(getfield.(ps, :r), getfield.(ps, :v), getfield.(ps, :m); n = n, dt = 0.01)
+	r[:,mod1(n+1,2)]
 end
 
 # ╔═╡ fd6c7b96-2823-11eb-1727-3b0cc6d50cf9
@@ -62,11 +60,11 @@ logns = 2:12
 
 # ╔═╡ 88b3bb56-2824-11eb-2de1-e37dd1d015f4
 let
-	r_Double64 = simulate.(Double64, NBodyLeapFrog.i_leapfrog_clean, Ref(planets), logns)
+	r_Double64 = simulate.(Double64, NBodyLeapFrog.i_leapfrog!, Ref(planets), logns)
 	plt = plot([], [], yscale=:log10, xscale=:log10, label="")
 	for T in [Float32, Float64]
-		rt = simulate.(T, NBodyLeapFrog.i_leapfrog, Ref(planets), logns)
-		rt_clean = simulate.(T, NBodyLeapFrog.i_leapfrog_clean, Ref(planets), logns)
+		rt = simulate.(T, NBodyLeapFrog.i_leapfrog_reuse!, Ref(planets), logns)
+		rt_clean = simulate.(T, NBodyLeapFrog.i_leapfrog!, Ref(planets), logns)
 		errs1 = errors.(r_Double64, rt)
 		errs2 = errors.(r_Double64, rt_clean)
 		plot!(plt, 1 .<< logns, errs1; label="$T, reusing")
