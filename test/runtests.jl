@@ -35,9 +35,9 @@ end
 @testset "NBodyLeapFrog.jl" begin
     planets = Bodies.chunit_day2year.(Bodies.set)
     nplanets = length(planets)
-    r, v, a = leapfrog(planets; n = 55, dt = 0.01, keep_history=true)
-    r2, v2, a2 = leapfrog(planets; n = 55, dt = 0.01)
-    @test all(a->isapprox(a[1], a[2]), zip(a[:,end], a2))
+    r, v = leapfrog(planets; n = 55, dt = 0.01, keep_history=true)
+    r2, v2 = leapfrog(planets; n = 55, dt = 0.01)
+    @test all(a->isapprox(a[1], a[2]), zip(v[:,end], v2))
     @test all(r->isapprox(r[1], r[2]), zip(r[:,end], r2[:,end]))
 end
 
@@ -45,7 +45,7 @@ end
     planets = Bodies.chunit_day2year.(Bodies.set)
     nplanets = length(planets)
     n = 55
-    r, v, a = leapfrog(planets; n = n, dt = 0.01, keep_history=true)
+    r, v = leapfrog(planets; n = n, dt = 0.01, keep_history=true)
 
     v2 = zeros(V3{Float64}, nplanets)
     r2 = zeros(V3{Float64}, nplanets)

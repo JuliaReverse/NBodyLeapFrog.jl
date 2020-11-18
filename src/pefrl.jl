@@ -1,7 +1,7 @@
 # Forest-Ruth and Position Extended Forest-Ruth Like algorithm
 # Leapfrog is 2nd order, FR and PEFRL are 4th order.
 
-function leapfrog!(r::AbstractVecOrMat, v::AbstractVecOrMat, a::AbstractVecOrMat,
+function fr!(r::AbstractVecOrMat, v::AbstractVecOrMat, a::AbstractVecOrMat,
          planets::AbstractVector{Body{T}}; G, n, dt) where T
     nplanets = length(planets)
     @inbounds for i=1:n
@@ -25,8 +25,10 @@ function leapfrog!(r::AbstractVecOrMat, v::AbstractVecOrMat, a::AbstractVecOrMat
             end
         else # Use leap frog method to update velocity
             for j=1:nplanets
-                v[j,idx_plus1] = dt*a[j,idx] + v[j,idx]
-                r[j,idx_plus1] = dt*v[j,idx_plus1] + r[j,idx]
+                r[j,idx_plus1] = r[j,idx]
+                v[j,idx_plus1] = v[j,idx]
+                r[j,idx_plus1] += θ*dt/2*v[j,idx_plus1]
+                v[j,idx_plus1] += θ*dt*a[j]
             end
         end
     end
