@@ -16,7 +16,7 @@ Then open a Julia REPL and type
 ```julia
 julia> using Pluto
 
-julia> Pluto.run("~/.julia/dev/NBodyLeapFrog/notebooks/orbitals.jl")
+julia> Pluto.run(notebook="~/.julia/dev/NBodyLeapFrog/notebooks/orbitals.jl")
 ```
 
 Note the above path might vary in different systems.
