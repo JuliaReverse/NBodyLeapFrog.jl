@@ -40,22 +40,10 @@ end
     end
 end
 
-@i function i_leapfrog!(r::AbstractVector{V3{T}}, v::AbstractVector{V3{T}}, planets::AbstractVector{Body{T}}; G=G_year_AU, n, dt) where T
-    @routine @invcheckoff begin
-        nplanets ← length(planets)
-        m ← zeros(T, nplanets)
-        for i=1:nplanets
-            m[i] += planets[i].m
-        end
-    end
-    @invcheckoff @inbounds for i=1:nplanets
-        v[i] += planets[i].v
-        r[i] += planets[i].r
-    end
+@i function i_leapfrog!(r::AbstractVector{V3{T}}, v::AbstractVector{V3{T}}, m::AbstractVector{T}; G=G_year_AU, n, dt) where T
     @invcheckoff for i=1:n
         i_leapfrog_step!(r, v, m; G=G, dt=dt)
     end
-    ~@routine
 end
 
 @i function i_leapfrog_step!(r::AbstractVector{V3{T}}, v::AbstractVector{V3{T}}, m::AbstractVector; G=G_year_AU, dt) where T
@@ -85,20 +73,12 @@ end
     ~@routine
 end
 
-@i function i_leapfrog_reuse!(r::AbstractVector{V3{T}}, v::AbstractVector{V3{T}}, planets::AbstractVector{Body{T}}; G=G_year_AU, n, dt) where T
+@i function i_leapfrog_reuse!(r::AbstractVector{V3{T}}, v::AbstractVector{V3{T}}, m::AbstractVector{T}; G=G_year_AU, n, dt) where T
     @routine @invcheckoff begin
-        nplanets ← length(planets)
+        nplanets ← length(m)
         halfdt ← zero(dt)
         halfdt += dt/2
-        m ← zeros(T, nplanets)
         a ← zeros(V3{T}, nplanets)
-    end
-    for i=1:nplanets
-        m[i] += planets[i].m
-    end
-    for i=1:nplanets
-        v[i] += planets[i].v
-        r[i] += planets[i].r
     end
     @inbounds @invcheckoff for i=1:n
         # update position
