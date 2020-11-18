@@ -1,4 +1,4 @@
-@i function i_fr!(r::AbstractVector{V3{T}}, v::AbstractVector{V3{T}}, m::AbstractVector; G=G_year_AU, n, dt) where T
+@i function i_fr_step!(r::AbstractVector{V3{T}}, v::AbstractVector{V3{T}}, m::AbstractVector; G=G_year_AU, dt) where T
     @routine @invcheckoff begin
         nplanets ← length(m)
         θ ← 1/(2-2^(1/3))
@@ -10,7 +10,7 @@
         dt_minus_twoθdt += dt
         dt_minus_twoθdt -= 2 * θdt
     end
-    @inbounds @invcheckoff for i=1:n
+    @inbounds @invcheckoff begin
         a ← zeros(V3{T}, nplanets)
         for j=1:nplanets
             r[j] += halfθdt*v[j]
@@ -39,12 +39,13 @@
         for j=1:nplanets
             r[j] += halfθdt*v[j]
         end
+        a → zeros(V3{T}, nplanets)
     end
 
     ~@routine
 end
 
-@i function i_pefrl!(r::AbstractVector{V3{T}}, v::AbstractVector{V3{T}}, m::AbstractVector; G=G_year_AU, n, dt) where T
+@i function i_pefrl_step!(r::AbstractVector{V3{T}}, v::AbstractVector{V3{T}}, m::AbstractVector; G=G_year_AU, dt) where T
     @routine @invcheckoff begin
         nplanets ← length(m)
         ξ ← +0.1786178958448091E+00
@@ -60,7 +61,7 @@ end
         h_minus_2χh_minus_2ξh -= 2 * χh
         h_minus_2χh_minus_2ξh -= 2 * ξh
     end
-    @inbounds @invcheckoff for i=1:n
+    @invcheckoff @inbounds begin
         a ← zeros(V3{T}, nplanets)
         for j=1:nplanets
             r[j] += ξh*v[j]
@@ -97,8 +98,19 @@ end
         for j=1:nplanets
             r[j] += ξh*v[j]
         end
+        a → zeros(V3{T}, nplanets)
     end
-
     ~@routine
 end
 
+@i function i_pefrl!(r::AbstractVector{V3{T}}, v::AbstractVector{V3{T}}, m::AbstractVector; G=G_year_AU, n, dt) where T
+    @invcheckoff for i=1:n
+        i_pefrl_step!(r, v, m; dt=dt, G=G)
+    end
+end
+
+@i function i_fr!(r::AbstractVector{V3{T}}, v::AbstractVector{V3{T}}, m::AbstractVector; G=G_year_AU, n, dt) where T
+    @invcheckoff for i=1:n
+        i_fr_step!(r, v, m; dt=dt, G=G)
+    end
+end
