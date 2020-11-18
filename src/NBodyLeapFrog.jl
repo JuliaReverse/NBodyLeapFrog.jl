@@ -10,5 +10,6 @@ include("starData.jl")
 include("leapfrog.jl")
 include("reversible_leapfrog.jl")
 include("pefrl.jl")
+include("reversible_pefrl.jl")
 
 end
