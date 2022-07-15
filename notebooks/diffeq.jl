@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.10
+# v0.12.11
 
 using Markdown
 using InteractiveUtils
@@ -12,6 +12,9 @@ using NBodyLeapFrog
 
 # ╔═╡ 4aaf7264-2a45-11eb-1a8e-7976e5bbc634
 using StaticArrays
+
+# ╔═╡ 4ba29d18-2a63-11eb-16cf-d13492677a59
+using PlutoUI
 
 # ╔═╡ 4f659e96-2a45-11eb-03ab-01dbf5e82eb4
 tosvec(x::V3) = SVector(x.x, x.y, x.z)
@@ -110,3 +113,4 @@ integrator.sol
 # ╠═2f7fb8e6-2a01-11eb-229c-210763e47bca
 # ╠═32f10746-2a01-11eb-01ec-6b90be753181
 # ╠═372f56c6-2a01-11eb-0826-432eefb6198e
+# ╠═4ba29d18-2a63-11eb-16cf-d13492677a59
